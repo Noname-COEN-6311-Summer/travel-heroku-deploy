@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Payment</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Booking Details</h5>
+            <table class="table">
+                <tr>
+                    <th>Destination</th>
+                    <td>{{ booking.destination }}</td>
+                </tr>
+                <tr>
+                    <th>Hotel</th>
+                    <td>{{ booking.hotel }}</td>
+                </tr>
+                <tr>
+                    <th>Flights</th>
+                    <td>{{ booking.flights }}</td>
+                </tr>
+                <tr>
+                    <th>Activities</th>
+                    <td>{{ booking.activities }}</td>
+                </tr>
+                <tr>
+                    <th>Departure Time</th>
+                    <td>{{ booking.departure }}</td>
+                </tr>
+                <tr>
+                    <th>Price</th>
+                    <td>{{ booking.price }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <h3>Payment</h3>
+    <div id="payment-form">
+        <!-- Stripe Payment Form -->
+        <form id="stripe-payment-form" method="POST" action="{{ url_for('handle_payment') }}">
+            <input type="hidden" name="booking_id" value="{{ booking.id }}">
+            <input type="hidden" name="destination" value="{{ booking.destination }}">
+            <input type="hidden" name="hotel" value="{{ booking.hotel }}">
+            <input type="hidden" name="flights" value="{{ booking.flights }}">
+            <input type="hidden" name="activities" value="{{ booking.activities }}">
+            <input type="hidden" name="departure" value="{{ booking.departure }}">
+            <input type="hidden" name="price" value="{{ price }}">
+            <script
+                src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                data-key="{{ stripe_api_key }}"
+                data-amount="{{ booking.price }}"
+                data-name="Travel Agency"
+                data-description="Payment for {{ booking.destination }}"
+                data-currency="usd"
+                data-email="{{ user_email }}"
+                data-locale="auto"
+                data-label="Pay Now"
+                data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                data-allow-remember-me="false"
+                data-panel-label="Pay {{ booking.price }}"
+                data-zip-code="true"
+                data-billing-address="true"
+              ></script>
+            <div class="form-row">
+                <label for="card-element">
+                    Credit or debit card
+                </label>
+                <div id="card-element">
+                    <!-- A Stripe Element will be inserted here. -->
+                </div>
+
+                <!-- Used to display form errors. -->
+                <div id="card-errors" role="alert"></div>
+            </div>
+
+            <button id="submit-payment-btn" class="btn btn-success mt-3" type="submit">Pay Now</button>
+        </form>
+    </div>
+
+    {% if payment_confirmation %}
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Payment Confirmation</h5>
+                <p class="card-text">Your payment was successful. Thank you for your booking!</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // Stripe public key
+    var stripePublicKey = '{{ stripe_public_key }}';
+
+    // Create a Stripe client
+    var stripe = Stripe('sk_test_51NKDyyBhv3RRjKlwPulSQ7QH4cAcqm8EWVbFLQ45lBLrUrrrGciSgO8ob3rUUKInhtCD51NWGUSoN4aZlxWTPZv000IAjZeXq0');
+
+    // Create an instance of Elements
+    var elements = stripe.elements();
+
+    // Custom styling for Stripe elements
+    var style = {
+        base: {
+            fontSize: '16px',
+            color: '#32325d',
+        }
+    };
+
+    // Create an instance of the card Element
+    var card = elements.create('card', { style: style });
+
+    // Mount the card Element on the payment form
+    card.mount('#card-element');
+
+    // Handle real-time validation errors on the card Element
+    card.addEventListener('change', function(event) {
+        var displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    // Enable or disable the submit payment button based on card validation
+    var submitPaymentBtn = document.getElementById('submit-payment-btn');
+    var stripePaymentForm = document.getElementById('stripe-payment-form');
+    stripePaymentForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        stripe.createToken(card).then(function(result) {
+            if (result.error) {
+                // Inform the user if an error occurred
+                var errorElement = document.getElementById('card-errors');
+                errorElement.textContent = result.error.message;
+            }
+        });
+
+</script>
+{% endblock %}

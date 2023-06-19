@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container">
+    <h2>Messages</h2>
+    <form method="post" action="/message">
+        <div class="form-group">
+            <label for="recipient">Recipient:</label>
+            <input type="text" class="form-control" id="recipient" name="recipient" required>
+        </div>
+        <div class="form-group">
+            <label for="content">Message:</label>
+            <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+
+    <h3>Messages:</h3>
+{#    <ul>#}
+{#    {% for message in messages %}#}
+{#        <li>#}
+{#            <p><strong>From:</strong> {{ message.sender }}</p>#}
+{#            <p><strong>To:</strong> {{ message.recipient }}</p>#}
+{#            <p><strong>Content:</strong> {{ message.content }}</p>#}
+{#            <p><strong>Timestamp:</strong> {{ message.timestamp }}</p>#}
+{#        </li>#}
+{#    {% endfor %}#}
+{#    </ul>#}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>Content</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for message in messages %}
+            <tr>
+                <td><strong>From:</strong> {{ message.sender }}</td>
+                <td><strong>To:</strong> {{ message.recipient }}</td>
+                <td><strong>Content:</strong> {{ message.content }}</td>
+                <td><strong>Timestamp:</strong> {{ message.timestamp }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    </div>
+
+{% endblock %}

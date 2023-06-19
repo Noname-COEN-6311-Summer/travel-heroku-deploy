@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container">
+    <h2>Workstation</h2>
+    {% for customer in customers %}
+    <h3>{{ customer.username }}</h3>
+    {% set bookings = customer.get_book_information().get_bookings() %}
+    {% if bookings %}
+    <table class="table">
+        <tr>
+            <th>Destination</th>
+            <th>Hotel</th>
+            <th>Flights</th>
+            <th>Activities</th>
+            <th>Departure Time</th>
+            <th>Price</th>
+            <th>Actions</th>
+        </tr>
+        {% for booking in bookings %}
+        {% if booking.destination in ['Banff', 'Iceland', 'Greece'] %}
+        <tr>
+            <td>{{ booking.destination }}</td>
+            <td>{{ booking.hotel }}</td>
+            <td>{{ booking.flights }}</td>
+            <td>{{ booking.activities }}</td>
+            <td>{{ booking.departure }}</td>
+            <td>{{ customer.agent.calculate_price(booking) }}</td>
+            <td>N/A</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        {% for booking in bookings %}
+            {% if booking.destination not in ['Banff', 'Iceland', 'Greece'] %}
+                <tr>
+                    <form method="post" action="/modify-booking">
+                        <input type="hidden" name="booking_id" value="{{ booking.id or ''}}">
+                        <input type="hidden" name="username" value="{{ customer.username }}">
+                        <td>
+                            <select name="destination">
+                                <option value="New York" {% if booking.destination == 'New York' %}selected{% endif %}>New York</option>
+                                <option value="Paris" {% if booking.destination == 'Paris' %}selected{% endif %}>Paris</option>
+                                <option value="London" {% if booking.destination == 'London' %}selected{% endif %}>London</option>
+                                <option value="Rome" {% if booking.destination == 'Rome' %}selected{% endif %}>Rome</option>
+                                <option value="Montreal" {% if booking.destination == 'Montreal' %}selected{% endif %}>Montreal</option>
+                                <option value="Tokyo" {% if booking.destination == 'Tokyo' %}selected{% endif %}>Tokyo</option>
+                                <option value="Toronto" {% if booking.destination == 'Toronto' %}selected{% endif %}>Toronto</option>
+                                <option value="Vancouver" {% if booking.destination == 'Vancouver' %}selected{% endif %}>Vancouver</option>
+                                <!-- Add more options as needed -->
+                            </select>
+                        </td>
+                        <td>
+                            <select name="hotel">
+                                <option value="Hilton" {% if booking.hotel == 'Hilton' %}selected{% endif %}>Hilton</option>
+                                <option value="Holiday" {% if booking.hotel == 'Holiday' %}selected{% endif %}>Holiday</option>
+                                <option value="Marriott" {% if booking.hotel == 'Marriott' %}selected{% endif %}>Marriott</option>
+                                <!-- Add more options as needed -->
+                            </select>
+                        </td>
+                        <td>
+                            <select name="flights">
+                                <option value="Air Canada" {% if booking.flights == 'Air Canada' %}selected{% endif %}>Air Canada</option>
+                                <option value="WestJet" {% if booking.flights == 'WestJet' %}selected{% endif %}>WestJet</option>
+                                <option value="Poter" {% if booking.flights == 'Poter' %}selected{% endif %}>Poter</option>
+                                <option value="Air Transit" {% if booking.flights == 'Air Transit' %}selected{% endif %}>Air Transit</option>
+                                <!-- Add more options as needed -->
+                            </select>
+                        </td>
+                        <td>
+                            <select name="activities">
+                                <option value="guided tour" {% if booking.activities == 'guided tour' %}selected{% endif %}>Guided Tour</option>
+                                <option value="food" {% if booking.activities == 'food' %}selected{% endif %}>Food</option>
+                                <option value="excursions" {% if booking.activities == 'excursions' %}selected{% endif %}>Excursions</option>
+                                <!-- Add more options as needed -->
+                            </select>
+                        </td>
+                        <td>
+                            <input type="datetime-local" name="departure" value="{{ booking.departure }}">
+                        </td>
+                        <td>{{ customer.agent.calculate_price(booking) }}</td>
+                        <td>
+                            <button type="submit" class="btn btn-primary">Modify</button>
+                        </td>
+                    </form>
+                    {% else %}
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No bookings found.</p>
+    {% endif %}
+    {% endfor %}
+
+    <h2>Bookings Report</h2>
+    <table>
+        <tr>
+            <th>Package</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+        </tr>
+        {% set report = {} %}  {# Add this line to initialize the report dictionary #}
+        {% for customer in customers %}
+            {% set bookings = customer.get_book_information().get_bookings() %}
+            {% for booking in bookings %}
+                {% if booking.destination in ['Banff', 'Iceland', 'Greece'] %}
+                    {% set info = report.get(booking.destination) or {'quantity': 0, 'total_price': 0} %}
+                    {% set info = {'quantity': info.quantity + 1, 'total_price': info.total_price + customer.agent.calculate_price(booking)} %}
+                    {% set _ = report.update({booking.destination: info}) %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+        {% for destination, info in report.items() %}
+            <tr>
+                <td>{{ destination }}</td>
+                <td>{{ info.quantity }}</td>
+                <td>{{ info.total_price }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Total Revenue</h2>
+    <p>{{ total_revenue }}</p>
+
+    <h3>Messages:</h3>
+    <tbody>
+    {% for message in messages %}
+        <tr>
+            <td><strong>From:</strong> {{ message.sender }}</td>
+            <td><strong>To:</strong> {{ message.recipient }}</td>
+            <td><strong>Content:</strong> {{ message.content }}</td>
+            <td><strong>Timestamp:</strong> {{ message.timestamp }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+
+    <h3>Send Message:</h3>
+    <form method="post" action="/workstation">
+        <div class="form-group">
+            <label for="recipient">Recipient:</label>
+            <input type="text" class="form-control" id="recipient" name="recipient" required>
+        </div>
+        <div class="form-group">
+            <label for="content">Message:</label>
+            <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+
+    </div>
+
+{% endblock %}
