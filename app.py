@@ -9,7 +9,7 @@ app.secret_key = '123'
 # Import the routes from views.py
 from views.views import index, iceland, greece, banff, destination_page, view_database, register, login, logout, reset_password, profile, book, cancel_booking, workstation, modify_booking, message, payment, handle_payment, payment_success
 
-# Register the routes with the app
+# Register the routes with the app.
 app.route('/')(index)
 app.route('/iceland.html')(iceland)
 app.route('/greece.html')(greece)
