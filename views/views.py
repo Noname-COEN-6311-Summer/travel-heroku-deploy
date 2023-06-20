@@ -446,3 +446,7 @@ def handle_payment():
 @app.route('/payment-success')
 def payment_success():
     return render_template('payment_success.html')
+
+@app.route('/packagelist')
+def packagelist():
+    return render_template('packagelist.html')
