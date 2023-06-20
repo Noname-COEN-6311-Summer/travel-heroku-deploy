@@ -7,7 +7,7 @@ app.template_folder = 'templates'
 app.static_folder = 'static'
 app.secret_key = '123'
 # Import the routes from views.py
-from views.views import index, iceland, greece, banff, destination_page, view_database, register, login, logout, reset_password, profile, book, cancel_booking, workstation, modify_booking, message, payment, handle_payment, payment_success
+from views.views import packagelist, index, iceland, greece, banff, destination_page, view_database, register, login, logout, reset_password, profile, book, cancel_booking, workstation, modify_booking, message, payment, handle_payment, payment_success
 
 # Register the routes with the app.
 app.route('/')(index)
@@ -29,6 +29,7 @@ app.route('/message', methods=['GET', 'POST'])(message)
 app.route('/payment', methods=['GET', 'POST'])(payment)
 app.route('/handle-payment', methods=['POST'])(handle_payment)
 app.route('/payment-success')(payment_success)
+app.route('/packagelist')(packagelist)
 
 if __name__ == '__main__':
     app.run(debug=True)
