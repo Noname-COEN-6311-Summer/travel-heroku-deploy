@@ -5,7 +5,8 @@ from flask import Flask, render_template, redirect, url_for, session, request, j
 from datetime import datetime
 import stripe
 import json
-from models.models import Customer, Agent, Package, BookManager, AccountManager
+from models import Customer, Agent, Package, Message
+from controllers import BookManager, AccountMaanger
 account_manager = AccountManager()
 
 app = Flask(__name__)
